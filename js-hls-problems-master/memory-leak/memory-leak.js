@@ -6,8 +6,8 @@
     var MEDIA_PLAYLIST_URL = 'https://lw.bamgrid.com/2.0/hls/vod/bam/ms02/hls/dplus/bao/avc/unenc/8500k/vod.m3u8';
 
     // Keep a mock buffer of 5 segments available for playback.
-    var buffer = [];
-    var bufferedSegments = [];
+    var buffer = null;
+    var bufferedSegments = null;
 
     // Append MP4 segments to the mock buffer, but keep the buffer size in check to avoid memory overflow.
     // For some reason, even though we keep the buffer size in check, memory consumption continues to grow.
@@ -139,6 +139,11 @@
                     segment.arrayBuffer = arrayBuffer;
 
                     appendBuffer(segment);
+                     //Remove reference to the earliest segement's arraybuffer after buffer limit has reached.
+                    if(buffer.length === 5) {
+                        segmentList[currentSegmentIndex - (buffer.length -1)].arrayBuffer = null;
+                    }
+                    currentSegmentIndex++
 
                     currentSegmentIndex++
 
@@ -153,6 +158,9 @@
 
     document.getElementById('run-test-button').addEventListener('click', function () {
         console.log('Starting test');
+        /* Empty buffer if there exists data from previous tests */
+        buffer = [];
+        bufferedSegments = [];
         streamMovie(MEDIA_PLAYLIST_URL);
     });
 
