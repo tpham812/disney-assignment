@@ -2,9 +2,21 @@ exports.name = 'custom';
 
 const histories = {};
 
+
+const toBeat = {
+    'rock': 'paper',
+    'paper': 'scissors',
+    'scissors': 'rock'
+}
+
+
 exports.recordShot = (playerId, shot) => {
+    histories[playerId] = shot;
 };
 
 exports.makeShot = (playerId) => {
-    return 'foo';
+    if(!histories[playerId]) {
+        return 'rock'
+    }
+    return toBeat[histories[playerId]];
 };
