@@ -35,19 +35,28 @@ function makeDatabaseRequest(pathname, callback) {
 
 function findSegment(res, knownLength, position) {
 
-    function tryNext(index) {
-        makeDatabaseRequest(`/query?index=${index}`, (data) => {
+    function tryNext(left, right) {
+        if(left > right) {
+            return sendJSONResponse(res, 404, {});
+        }
+        //get middle index and try query
+        const mid = left + ((right - left) >> 1);
+        makeDatabaseRequest(`/query?index=${mid}`, (data) => {
             const { result } = data;
-
-            if (result.start <= position && position <= result.end) {
+           if (result.start <= position && position <= result.end) {
                 return sendJSONResponse(res, 200, data);
             }
-
-            tryNext(index + 1);
+            //if not found and position is less than start then update window to left: mid + 1, right: right
+            if(position > result.end) {
+                tryNext(mid + 1, right);
+            }
+            //if not found and position is not less than start then update window to left: left, right: mid - 1
+            else {
+                tryNext(left, mid - 1);
+            }
         });
     }
-
-    tryNext(0);
+    tryNext(0, knownLength - 1);
 }
 
 function getRange(res) {
