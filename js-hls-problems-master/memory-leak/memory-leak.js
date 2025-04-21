@@ -18,7 +18,8 @@
         // Remove segments which we no longer need to simulate playback.
         while (buffer.length > 5) {
             buffer.shift();
-            bufferedSegments.shift();
+            //Remove reference to arrayBuffer to free up memory during garbage collection.
+            bufferedSegments.shift().arrayBuffer = null;
         }
 
         var totalBufferDuration = bufferedSegments.reduce(function (duration, segment) {
@@ -127,6 +128,7 @@
             var currentSegmentIndex = 0;
 
             function loadAndBufferSegment() {
+                //Could potentially set element in segmentList to null when bufferedSegements removes the earliest segement or segments.
                 var segment = segmentList[currentSegmentIndex];
 
                 if (!segment) {
@@ -137,14 +139,7 @@
                 loadSegment(segment.url, function (arrayBuffer) {
 
                     segment.arrayBuffer = arrayBuffer;
-
                     appendBuffer(segment);
-                     //Remove reference to the earliest segement's arraybuffer after buffer limit has reached.
-                    if(buffer.length === 5) {
-                        segmentList[currentSegmentIndex - (buffer.length -1)].arrayBuffer = null;
-                    }
-                    currentSegmentIndex++
-
                     currentSegmentIndex++
 
                     // Load a new segment every 2 seconds for this test.
@@ -158,7 +153,7 @@
 
     document.getElementById('run-test-button').addEventListener('click', function () {
         console.log('Starting test');
-        /* Empty buffer if there exists data from previous tests */
+        // Empty buffer if there exists data from previous tests.
         buffer = [];
         bufferedSegments = [];
         streamMovie(MEDIA_PLAYLIST_URL);
