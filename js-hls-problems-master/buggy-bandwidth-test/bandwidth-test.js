@@ -640,9 +640,17 @@
                 } else {
                     bufferedSegments.push(segment);
                 }
-
-                sourceBuffer.appendBuffer(arrayBuffer);
-                sourceBuffer.addEventListener('updateend', onUpdateEnd);
+                const tryAppend = () => {
+                    try {
+                        sourceBuffer.appendBuffer(arrayBuffer);
+                        sourceBuffer.addEventListener('updateend', onUpdateEnd);
+                    } catch (ex) {
+                        setTimeout(tryAppend, 2000);
+                    }
+                   
+                }
+                tryAppend();
+                
             });
         }
 
