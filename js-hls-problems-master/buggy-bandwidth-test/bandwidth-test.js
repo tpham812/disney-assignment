@@ -640,6 +640,7 @@
                 } else {
                     bufferedSegments.push(segment);
                 }
+                // Wait to append to buffer as soon as space frees up. Otherwise if space runs out, an exception is thrown.
                 const tryAppend = () => {
                     try {
                         sourceBuffer.appendBuffer(arrayBuffer);
